@@ -38,7 +38,7 @@ export default function Home() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f9fcff] via-white to-[#fde9e3] text-zinc-900">
+    <div className="min-h-screen bg-gradient-to-b from-[#f3f9fe] via-[#eff7ff] to-white text-zinc-900">
       <main className="flex min-h-screen w-full flex-col gap-12 px-6 py-12 sm:px-10 lg:px-16 lg:max-w-[1600px] lg:mx-auto">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
