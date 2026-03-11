@@ -1,4 +1,4 @@
-// Server Component: keep layout/content server-rendered; sections are data-driven.
+// Server Component: rebrand to Mailvanta, update page structure for marketing, auth, and dashboard CTAs.
 import { getHomeContent } from "../content/home";
 import { HeroSection } from "../components/home/HeroSection";
 import { LogosMarqueeSection } from "../components/home/LogosMarqueeSection";
@@ -9,12 +9,11 @@ import { SecuritySection } from "../components/home/SecuritySection";
 import { DocsSupportSection } from "../components/home/DocsSupportSection";
 import { LegalSection } from "../components/home/LegalSection";
 import { CtaSection } from "../components/home/CtaSection";
+import Link from "next/link";
 
 export default function Home() {
   const content = getHomeContent();
 
-  // Simple toggles so agents/users can hide sections without touching JSX.
-  // Use ONLY_SECTIONS (comma list) to whitelist, or HIDE_SECTIONS to blacklist.
   const only = (process.env.ONLY_SECTIONS ?? "")
     .split(",")
     .map((s) => s.trim().toLowerCase())
@@ -23,7 +22,7 @@ export default function Home() {
     .split(",")
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
-  const defaultHide = ["features", "metrics", "pricing", "security", "docs", "legal"];
+  const defaultHide = [];
   const whitelist = only.length ? new Set(only) : null;
   const hide = new Set(whitelist ? envHide : [...defaultHide, ...envHide]);
   const sections = [
@@ -39,31 +38,39 @@ export default function Home() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 via-white to-[#ffe6d8] text-zinc-900">
+    <div className="min-h-screen bg-gradient-to-b from-[#f9fcff] via-white to-[#fde9e3] text-zinc-900">
       <main className="flex min-h-screen w-full flex-col gap-12 px-6 py-12 sm:px-10 lg:px-16 lg:max-w-[1600px] lg:mx-auto">
-        {/* Header: Panda wordmark and primary actions (docs/deploy); wraps on small screens */}
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-full border border-[#fb7232]/30 bg-white px-5 py-2 shadow-sm">
-              <span className="text-2xl font-black tracking-tight text-[#fb7232]">Panda</span>
+            <div className="rounded-full border border-[#19aae6]/30 bg-white px-5 py-2 shadow-sm">
+              <span className="text-2xl font-black tracking-tight text-[#0773c6]">
+                <span role="img" aria-label="envelope logo" className="mr-2">✉️</span>
+                Mailvanta
+              </span>
             </div>
-            <p className="text-sm font-medium text-[#c75829] sm:text-base">
-              Lightweight SaaS starter ready to ship.
+            <p className="text-sm font-medium text-[#277ca3] sm:text-base">
+              Powerful bulk email, zero hassle. Next.js SaaS template, now for high-volume outreach.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:justify-end w-full sm:w-auto">
-            <a
-              href="https://nextjs.org/docs"
-              className="w-full sm:w-auto text-center rounded-full border border-[#fb7232]/30 bg-white px-4 py-2 text-sm font-semibold text-[#c75829] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            <Link
+              href="/login"
+              className="w-full sm:w-auto text-center rounded-full border border-[#0773c6]/30 bg-white px-4 py-2 text-sm font-semibold text-[#277ca3] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
-              Docs
-            </a>
-            <a
-              href="https://vercel.com/new"
-              className="w-full sm:w-auto text-center rounded-full bg-[#fb7232] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e06225] hover:shadow-md"
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="w-full sm:w-auto text-center rounded-full bg-[#0773c6] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#065fa6] hover:shadow-md"
             >
-              Deploy
-            </a>
+              Register
+            </Link>
+            <Link
+              href="/dashboard"
+              className="w-full sm:w-auto text-center rounded-full border border-[#19aae6]/30 bg-white px-4 py-2 text-sm font-semibold text-[#19aae6] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              Dashboard
+            </Link>
           </div>
         </header>
 
@@ -72,8 +79,6 @@ export default function Home() {
           .filter(([id]) => !hide.has(id))
           .map(([, node]) => node)}
       </main>
-
-      {/* lightweight animations defined locally to avoid tailwind config changes */}
       <style>{`
         @keyframes float {
           0% { transform: translateY(0px); }
@@ -109,7 +114,7 @@ export default function Home() {
         }
         .hover-lift:hover {
           transform: translateY(-6px);
-          box-shadow: 0 20px 40px -24px rgba(251, 114, 50, 0.45);
+          box-shadow: 0 20px 40px -24px rgba(7, 115, 198, 0.37);
         }
       `}</style>
     </div>
