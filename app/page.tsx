@@ -22,7 +22,7 @@ export default function Home() {
     .split(",")
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
-  const defaultHide = [];
+  const defaultHide: string[] = [];
   const whitelist = only.length ? new Set(only) : null;
   const hide = new Set(whitelist ? envHide : [...defaultHide, ...envHide]);
   const sections = [
