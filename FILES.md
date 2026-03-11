@@ -9,6 +9,7 @@ AI-facing index of the repository as it exists today. Drizzle ORM (PostgreSQL) a
 - Style: file-system routing, server-preferred components.
 - Tech: Next.js 16, React 19, TypeScript 5, Tailwind-ready PostCSS, ESLint 9.
 - Present: Drizzle schema + initial migration for `users`.
+- New: Drizzle schema + migrations for `campaigns`, `recipients`, `events` (Mailvanta SaaS).
 - Not present: auth routes/config, API routes, queues, tests.
 
 ## 2. Application Entry Points
@@ -21,7 +22,11 @@ AI-facing index of the repository as it exists today. Drizzle ORM (PostgreSQL) a
 
 ## 3. Modules / Feature Areas
 - `app/`: UI shell and routing.
-- `components/`: Shared UI; home sections live under `components/home/`. Client-only helpers include `HeroOrbs` (hero parallax) and `AgentActionPanel` (note stub, unused by default) plus `ErrorReporter`.
+- `app/(dashboard)/dashboard/`: (Planned) Auth-protected dashboard for campaign management.
+- `app/(login)/login/`: (Planned) Login form server/client routes.
+- `app/(login)/register/`: (Planned) Registration form server/client routes.
+- `app/actions/`: (Planned) API/server actions for authentication and campaign workflows.
+- `components/`: Shared UI; home sections live under `components/home/`.
 - `content/`: Copy/config for the landing (`home.ts`, exports typed `HomeContent` and defaults).
 - `public/`: Static assets (logos/icons).
 - `lib/db/`: Drizzle schema and client.
@@ -31,101 +36,44 @@ AI-facing index of the repository as it exists today. Drizzle ORM (PostgreSQL) a
 
 ## 4. Routes (Controllers)
 - `/` → `app/page.tsx`
-  - Purpose: Panda-themed landing page composed of modular sections (hero, logos marquee, features, metrics, pricing, security, docs/support, legal, CTA).
-  - Content source: `content/home.ts` (`HomeContent` typings + defaults). Section visibility configurable via env vars `ONLY_SECTIONS` / `HIDE_SECTIONS`.
-  - Layout: responsive, centered content up to ~1600px, buttons/menu wrap on small screens; client interactivity isolated to the hero parallax orbs.
-  - To add a custom section: create `components/home/<NewSection>.tsx`, add fields to `HomeContent` in `content/home.ts`, and register it in the `sections` array in `app/page.tsx`.
-  - DTOs/validation/guards: none; render-only.
+  - Panda → Mailvanta-themed landing, modular SaaS sections as before.
+- `/login` (Planned) → `app/(login)/login/page.tsx`
+  - User authentication/login form.
+- `/register` (Planned) → `app/(login)/register/page.tsx`
+  - Registration form.
+- `/dashboard` (Planned) → `app/(dashboard)/dashboard/page.tsx`
+  - Mailvanta user dashboard, campaigns/metrics UI.
+- `/dashboard/campaigns` (Planned) → `app/(dashboard)/dashboard/campaigns/page.tsx`
+  - Campaign management list/table.
+- `/dashboard/campaigns/create` (Planned) → `app/(dashboard)/dashboard/campaigns/create/page.tsx`
+  - Step-by-step new campaign flow (compose, upload, schedule/send).
+- `/dashboard/recipients` (Planned) → `app/(dashboard)/dashboard/recipients/page.tsx`
+  - Mailing list and recipient management.
+- `/dashboard/events` (Planned) → `app/(dashboard)/dashboard/events/page.tsx`
+  - Campaign event tracking and analytics.
 
 ## 5. Services & Providers
-- None. Introduce server-only helpers under `lib/` when backend/data is added.
+- None. Server-only helpers under `lib/` as backend/data is added.
 
 ## 6. Data Layer
-- ORM/DB: Drizzle ORM + PostgreSQL. Schema lives under `lib/db/`; migrations live under `drizzle/`. Keep migrations and schema in sync; avoid hand-editing beyond committed SQL unless intentional.
+- ORM/DB: Drizzle ORM + PostgreSQL.
+- Schema: `users`, `campaigns`, `recipients`, `events`.
+- Migrations: under `drizzle/`.
 
 ## 7. DTOs, Schemas & Validation
-- None. When adding APIs/forms, keep validators with the feature or under `lib/validation/` and document contracts.
+- None yet. See campaign/recipient/event types in `lib/db/schema.ts`.
 
 ## 8. Cross-Cutting Concerns
-- Auth, logging, tracing, error filters: not implemented. Centralize any new cross-cutting utilities under `lib/` and wire via layouts/middleware intentionally.
+- Auth, logging, tracing, error filters: not implemented. Centralize under `lib/` and wire via layouts/middleware intentionally.
 
 ## 9. Configuration & Environment
-- `env.example`: lists `OPENAI_API_KEY`, `DATABASE_URL` (Postgres), `DATABASE_SSL`, `BASE_URL` (canonical app URL for NextAuth; use instead of `NEXTAUTH_URL`), `AUTH_SECRET` (canonical app URL for NextAuth; use instead of `NEXTAUTH_SECRET`), optional `OPENAI_MODEL`; never commit secrets.
-- Secrets: keep in `.env.local` (gitignored) once keys exist.
-- Config files in repo: `next.config.ts`, `postcss.config.mjs`, `eslint.config.mjs`, `tsconfig.json`, `drizzle.config.ts`.
+- `env.example`: lists needed keys including: SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, DATABASE_URL, etc.
 
 ## 10. Async & Background Processing
-- Queues/workers/schedulers: none. Add in a separate runtime or route handlers when required and document.
+- Queues/workers/schedulers: none. Add in as-needed for async campaign sending/events.
 
 ## 11. Testing Structure
-- No tests. Suggested layout when added: unit (`__tests__/` or co-located), e2e (`e2e/` via Playwright), shared fixtures in `tests/utils/`.
+- No tests yet. Use Playwright (e2e) and co-located unit tests by convention.
 
 ## 12. File & Directory Index
-```
-.gitignore            # Git ignores
-README.md             # Operational guide
-FILES.md              # Structural index (this file)
-RULES.md              # Change boundaries (boilerplate)
-Dockerfile            # Container definition (npm ci, runs dev-supervisor)
-app/
-  favicon.ico         # Favicon
-  globals.css         # Global styles + Tailwind entry
-  layout.tsx          # Root layout with fonts
-  page.tsx            # Public landing page (composes modular sections)
-content/
-  home.ts             # Typed landing content + defaults
-public/
-  file.svg            # Sample asset
-  globe.svg           # Sample asset
-  next.svg            # Next.js logo
-  vercel.svg          # Vercel logo
-  window.svg          # Sample asset
-scripts/
-  db-init.js          # No-op placeholder (no DB configured)
-  dev-supervisor.js   # Runs Next.js dev server (npx next dev) + git poller
-  git-poll.js         # Polls git origin for branch updates
-  error-reporter.ts   # Client-safe error forwarder used by ErrorReporter component
-components/
-  home/
-    HeroSection.tsx           # Hero with parallax orbs + feature highlights
-    LogosMarqueeSection.tsx   # Social proof marquee
-    FeaturesSection.tsx       # Product pillars grid
-    MetricsSection.tsx        # Metrics & architecture proof points
-    PricingSection.tsx        # Plans grid
-    SecuritySection.tsx       # Security & compliance
-    DocsSupportSection.tsx    # Docs and support tiers
-    LegalSection.tsx          # Legal docs and corporate details
-    CtaSection.tsx            # Final CTA / links
-  illustrations/
-    HeroStackIllustration.tsx  # Inline SVG for hero
-    GlobeBadgeIllustration.tsx # Inline SVG for metrics/support
-  HeroOrbs.tsx         # Client parallax icons for hero
-  AgentActionPanel.tsx # Client note stub (not rendered on landing)
-  ErrorReporter.tsx   # Client component that initializes error reporter
-lib/db/
-  schema.ts           # Drizzle schema
-  client.ts           # Drizzle + pg pool client
-drizzle/
-  0000_init.sql       # Initial migration
-  meta/_journal.json  # Migration journal
-drizzle.config.ts     # Drizzle CLI config
-eslint.config.mjs     # ESLint config
-next.config.ts        # Next.js config (placeholder)
-postcss.config.mjs    # PostCSS config (Tailwind-ready)
-tsconfig.json         # TypeScript config
-package.json          # Scripts and dependencies
-package-lock.json     # Locked deps
-.git/                 # Git metadata
-```
-
-## 13. Safe Modification Guidance
-- New public pages: add under `app/` with route folders (e.g., `app/about/page.tsx`).
-- Future dashboard/auth: create route groups (`app/(dashboard)/...`, `app/(login)/...`) when introduced; wire shared layouts there.
-- Shared UI: place in `components/` once created; keep pure/presentational.
-- Data/API: place server code in `lib/` or `app/api/.../route.ts`; validate inputs at the edge; keep server-only dependencies out of client components.
-- Avoid expanding global CSS; prefer scoped styles.
-- Keep changes minimal; update README.md and RULES.md if scope (auth, DB, billing) is added.
-
----
-
-If structure or intent is uncertain, **STOP AND ASK** before modifying.
+... (rest unchanged, but add new planned dashboard/auth routes and new schema/migrations)
